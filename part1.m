@@ -1,7 +1,7 @@
 %% PPNHAR001 EEE5119Z
 % Course project: SAR Radar
 
-
+clear
 cd /home/harry/Documents/uni/2025F/EEE5119Z/EEE5119Z_Project/
 load('sim_data_single.mat');
 c = 3e8; % m/s
@@ -41,9 +41,18 @@ f_sample = p.B;
 
 %% Question 2
 % Generating Sbb
-dt = 0.001; % Time divisions for our time domain
-t = -5: dt :5-dt; % Time vector
-rect_width = 4; % width of the rectangular window
+dt = 1 * 10^-9; % Time divisions for our time domain
+% Im realizing now that the frequency is going to be incredibly high, so
+% maybe dt must be much more fine grained
+% Originally had dt at 10^-3 but the shape was weird, so I reasoned that
+% the high freuqeny with the really large timesteps was making it badly
+% sampled
+
+%t = -5000 * dt: dt :4999 * dt; % Time vector
+t = -5*10^-6 : dt : 5*10^-6 - dt;
+
+%rect_width = 4000 * dt; % width of the rectangular window
+rect_width = 4 * 10^-6;
 S_bb = exp(1j*pi*delta*t.^2) .* transpose(rect_function(t, 0, rect_width)); % Define signal
 
 % Plotting the envelope of the chirp, I think it should just be the rect function so whatever
@@ -52,11 +61,71 @@ plot(t, transpose(rect_function(t, 0, rect_width)), LineWidth=2);
 
 figure
 plot(t, real(S_bb), LineWidth=2);
-hold on
+%hold on
+
+figure
 plot(t, imag(S_bb), linewidth = 2);
-legend({'Re(S_{Tx}^{BB})','Im(S_{Tx}^{BB})'},'Location','northeast');
+%legend({'Re(S_{Tx}^{BB})','Im(S_{Tx}^{BB})'},'Location','northeast');
 
 %% Question 3
-%-[ ]Ambiguity function of Sbb
-%-[ ]0 range cut
-%-[ ]0 doppler cut
+%-[x]Ambiguity function of Sbb
+%-[x]0 range cut
+%-[x]0 doppler cut
+
+%PoMR 801: AF seems to be just AF(t, fd) = |S(t)*shift convolved with S(t)|
+
+% Normalizing the chirp
+S_bb_u = S_bb / sqrt(sum(abs(S_bb).^2));
+
+
+%noise = randn(length(t));
+%S_bb_u = noise(1, :);
+
+
+
+% Defining doppler ranges
+% In PoMR the axis ranges +- 5 B which is a LOT MORE than I imagined
+d_doppler = 10; % should be doppler res
+f_doppler = -500: d_doppler : 500 - d_doppler;
+% Normalizing the time axis
+time_axis = t/(5000*dt);
+doppler_modifier = exp(1j * 2 * pi * f_doppler' .* t); % As desired its time wide x doppler tall
+
+% The coefficient takes the form of e^(j 2pi f_d t)
+
+shifted_signal = S_bb_u .* doppler_modifier; % <<< might blow up matlab
+conv_signal = zeros(length(f_doppler), 2*length(S_bb_u) - 1);
+
+% For loop method for this
+for i = 1:length(f_doppler)
+    conv_signal(i,:) = conv(shifted_signal(i,:), conj(flip(S_bb_u))); % conv makes it 2x-1 sized?
+end
+
+
+% Matrix method for doing this
+%fft_shifted_signal = fft(shifted_signal);
+%fft_base = conj(fft(S_bb_u));
+%fft_conv_signal = fft_shifted_signal .* fft_base;
+%conv_signal = ifft(fft_conv_signal);
+AF = pow2db(abs(conv_signal)); % db measurements
+
+decimation_factor = 10;
+AF_decimated = AF(1:decimation_factor:end, 1:decimation_factor:end);
+figure
+mesh(AF_decimated); % Can decimate the plot by a factor of 10 or 100
+
+% Decimate the plot, plot every nth bin or whatever
+
+% The zero range and zero doppler cuts likely correspond with with the
+% centers of the plot
+
+zero_range_cut = AF(round(size(AF,1)/2), :);
+figure
+plot(zero_range_cut);
+
+
+zero_doppler_cut = AF(:, round(size(AF,2)/2));
+figure
+plot(zero_doppler_cut);
+
+%% Question 4
