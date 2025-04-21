@@ -1,5 +1,5 @@
 %% PPNHAR001 EEE5119Z
-% Course project: SAR Radar
+% Course project: SAR Radar Part 1
 
 clear
 cd /home/harry/Documents/uni/2025F/EEE5119Z/EEE5119Z_Project/
@@ -47,8 +47,12 @@ f_sample = p.B;
 dt = 1 * 10^-9; % Time divisions for our time domain
 t = -5*10^-6 : dt : 5*10^-6 - dt;
 
-rect_width = 4 * 10^-6;
+rect_width = p.ts;
 S_bb = exp(1j*pi*delta*t.^2) .* transpose(rect_function(t, 0, rect_width)); % Define signal
+if signal_is_noise == true
+    noise = randn(length(t));
+    S_bb = noise(1, :);
+end
 
 % Plotting the envelope of the chirp, I think it should just be the rect function so whatever
 figure
@@ -71,10 +75,7 @@ plot(t, imag(S_bb), linewidth = 2);
 
 % Normalizing the chirp
 S_bb_u = S_bb / sqrt(sum(abs(S_bb).^2));
-if signal_is_noise == true
-    noise = randn(length(t));
-    S_bb_u = noise(1, :);
-end
+
 
 % Defining doppler ranges
 d_doppler = 10; % should be doppler res
@@ -108,4 +109,18 @@ plot(zero_doppler_cut);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Question 4
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% beamwidth is the -3dB point
+
+beam_angle = -beamwidth: 1/1000 : beamwidth - 1/10000;
+%x = (pi*p.L*sin(beam_angle))/p.lambda;
+
+antenna_pattern = (p.L * sinc(beam_angle));
+
+figure
+plot(beam_angle, pow2db(antenna_pattern));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Question 5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
