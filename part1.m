@@ -44,10 +44,11 @@ f_sample = p.B;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Generating Sbb
-dt = 1 * 10^-9; % Time divisions for our time domain
+%dt = 1 * 10^-9; % Time divisions for our time domain
+dt = 1/f_sample; % This might make more sense
 t = -5*10^-6 : dt : 5*10^-6 - dt;
 
-rect_width = p.ts;
+rect_width = p.ts; % This ensures the length of the chirp is correct
 S_bb = exp(1j*pi*delta*t.^2) .* transpose(rect_function(t, 0, rect_width)); % Define signal
 if signal_is_noise == true
     noise = randn(length(t));

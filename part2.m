@@ -12,18 +12,19 @@ base_frequency = c/p.lambda; % Around 10 GHz
 %% Question 1 - Apply ranged compression
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generating Sbb
-dt = 1 * 10^-9; % Time divisions for our time domain
+f_sample = p.B;
+
+dt = 1/f_sample; % Time divisions for our time domain
 t = -5*10^-6 : dt : 5*10^-6 - dt;
 rect_width = p.ts;
 S_bb = exp(1j*pi*delta*t.^2) .* transpose(rect_function(t, 0, rect_width)); % Define signal. The length should be the same length as the received data.
 reverse_conj_signal = conj(flip(S_bb));
 
-%TODO: Check the actual data information (how can I matched filter with
-%something of different length?)
+range_compressed_data = zeros(size(data,1), size(data,2) + length(S_bb) - 1); % The number of columns is dictated by the output length of the convolutions
 
-range_compressed_data = zeros(size(data));
-for i = 1:size(data,2)
+for i = 1:size(range_compressed_data,1)
 %    reverse_conj_signal = conj(flip(data(i,:)));
-    range_compressed_data(i,:) = conv(data(i,:), reverse_conj_signal(i,:)); % definition in the project pdf doesn't reverse and conjugate Tx, just normal convolution of Rx and Tx
+    range_compressed_data(i,:) = conv(data(i,:), reverse_conj_signal(:)); % definition in the project pdf doesn't reverse and conjugate Tx, just normal convolution of Rx and Tx
 end
 
+mesh(abs(data))
