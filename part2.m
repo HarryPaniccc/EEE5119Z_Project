@@ -56,13 +56,17 @@ imagesc(plotted_data)
 colorbar
 xlabel('Range Bins')
 ylabel('Slow Time / Pulses')
-title('Range Compressed Data (dB)')
+title('Doppler fftd data (dB)')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Question 4 - Azimuth compression
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+range_over_time = sqrt(p.vec_range.^2 + p.vec_azimuth.^2);
+azimuth_phase_variation = exp(-1j * 4 * pi * range_over_time / p.lambda);
 azimuth_compressed_data  = zeros(size(range_doppler_map, 1), size(range_doppler_map, 2) + length(reverse_conj_signal) - 1);
+
+
 
 for i = 1:size(azimuth_compressed_data,1)
     azimuth_compressed_data(i,:) = conv(range_doppler_map(i,:), reverse_conj_signal(:)); % This is wrong. Use the description of the process in the handout.

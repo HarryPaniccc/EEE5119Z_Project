@@ -113,15 +113,28 @@ plot(zero_doppler_cut);
 %% Question 4
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% beamwidth is the -3dB point, and is 0.0266 radians
-beam_angles = -beamwidth/2: 1/10000 : beamwidth/2; % Beamwidth is in radians
+beam_angles = -pi : 1/1000 : pi;
 x = pi * p.L * sin(beam_angles) / p.lambda; % Im restarted I think
 antenna_pattern = (p.L .* sinc_function(x)).^2;
 
 figure
-plot(beam_angles, pow2db(abs(antenna_pattern))); 
+plot(beam_angles, pow2db(abs(antenna_pattern)));
+
 % Coffee cup example, what would you see at a target not the shape of the pattern 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 %% Question 5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is the 3dB range one, Q4 is across all angles
+
+% beamwidth is the -3dB point, and is 0.0266 radians
+target_angles = -beamwidth/2: 1/10000 : beamwidth/2; % Beamwidth is in radians
+x = pi * p.L * sin(target_angles) / p.lambda; % Im restarted I think
+target_appearance = (p.L .* sinc_function(x)).^2;
+
+figure
+plot(target_angles, pow2db(abs(target_appearance)));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Question 6
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
